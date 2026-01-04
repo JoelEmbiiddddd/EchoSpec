@@ -37,8 +37,11 @@ PROMPTS_DST_DIR="$CODEX_HOME/prompts"
 echo "[EchoSpec] Target repo: $REPO_ROOT"
 echo "[EchoSpec] Codex prompts dir: $PROMPTS_DST_DIR"
 
+KIT_HOME="${ECHOSPEC_HOME:-$HOME/.echospec}"
+KIT_DIR="$KIT_HOME/kit"
+
 # 1) remove prompts
-PROMPTS=( "echospec-init.md" "echospec-new.md" "echospec-apply.md" "echospec-archive.md" )
+PROMPTS=( "echospec-init.md" "echospec-new.md" "echospec-apply.md" "echospec-archive.md" "echospec-reflect.md" )
 if [[ -d "$PROMPTS_DST_DIR" ]]; then
   for p in "${PROMPTS[@]}"; do
     f="$PROMPTS_DST_DIR/$p"
@@ -53,6 +56,18 @@ if [[ -d "$PROMPTS_DST_DIR" ]]; then
   done
 else
   echo "[EchoSpec] No prompts dir found; skipped."
+fi
+
+# 1.5) remove kit
+if [[ -d "$KIT_DIR" ]]; then
+  if confirm "Remove EchoSpec kit at $KIT_DIR ?"; then
+    rm -rf "$KIT_DIR"
+    echo "[EchoSpec] Removed kit: $KIT_DIR"
+  else
+    echo "[EchoSpec] Kept kit: $KIT_DIR"
+  fi
+else
+  echo "[EchoSpec] No kit dir found; skipped."
 fi
 
 # 2) remove EchoSpec block in AGENTS.md

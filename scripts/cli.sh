@@ -21,6 +21,7 @@ usage() {
   ./scripts/cli.sh link
   echospec install [--force-prompts] [--no-agents]
   echospec update  [--agents] [--force-prompts]
+  echospec new [DESC] [DATE]        # 仅创建 change（不走大模型）
   echospec uninstall [--yes] [--purge-echospec]
   echospec --version
 
@@ -63,6 +64,22 @@ STUBEOF
 
   update)
     exec "$SRC_ROOT/scripts/update.sh" "$@"
+    ;;
+
+  new)
+    # 运行期脚本位于 ~/.echospec/kit/scripts（由 install/update 安装）
+    KIT_HOME="${ECHOSPEC_HOME:-$HOME/.echospec}"
+    KIT_SCRIPT="$KIT_HOME/kit/scripts/new.sh"
+    [[ -f "$KIT_SCRIPT" ]] || die "未找到 $KIT_SCRIPT。请先运行：echospec install"
+    exec bash "$KIT_SCRIPT" "$@"
+    ;;
+
+  new)
+    # 运行期脚本固定放在 ~/.echospec/kit/scripts
+    KIT_HOME="${ECHOSPEC_HOME:-$HOME/.echospec}"
+    KIT_NEW="$KIT_HOME/kit/scripts/new.sh"
+    [[ -f "$KIT_NEW" ]] || die "未安装 kit：$KIT_NEW 不存在。请先运行：echospec install"
+    exec bash "$KIT_NEW" "$@"
     ;;
 
   uninstall)

@@ -1,74 +1,30 @@
 ---
-description: 执行 change（tasks-only），并追加 status 事件（in_progress / done）
+description: 执行 change（严格 tasks-only），并追加 status 事件（in_progress / done）
 argument-hint: [CHANGE_ID 可选]
 ---
 
-参数：
-- $1 = CHANGE_ID（可选）
-若未提供，从 .echospec/current 读取（必须非空）。
+## 语言要求（强制）
+- 所有自然语言输出必须为中文（简体）。
 
-目标：
-- 严格按 tasks.md 执行
-- 只在 tasks 要求时参考 spec.md
-- 默认不读 notes.md（除非 tasks 要求）
-- 在 .echospec/index.jsonl 追加 status 事件（append-only，schema 固定）：
-  - 开始：* -> in_progress
-  - 完成：in_progress -> done
+## 参数
+- $1 = CHANGE_ID（可选）；未提供则读 `.echospec/current`（必须非空）
 
-事件字段要求：
-- at：ISO(+08:00)，优先 python3
-- title：从 meta.json 读取（优先 jq，否则 python3；读不到则 ""）
-- status：顶层 status = data.to
-- paths：固定拼接
+## 规则（极重要）
+- 只按 `.echospec/changes/<id>/tasks.md` 逐条执行（禁止范围外重构/顺手优化）
+- `spec.md` 仅用于验收口径对齐；默认不读 `notes.md`（除非 tasks 要求）
+- 需求不清：把问题写进 notes.md 的“待确认”，并立刻停下向用户提问
 
-执行步骤：
-1) 确定 change_id（参数优先，否则读 .echospec/current；为空则停止并提示先 echospec-new）
-2) 设定路径：
-change_dir=".echospec/changes/<id>"
-meta="$change_dir/meta.json"
-tasks="$change_dir/tasks.md"
-spec="$change_dir/spec.md"
-notes="$change_dir/notes.md"
+## 事件账本（append-only）
+- 在开始时追加 1 条 status 事件：to=in_progress
+- 全部完成并验证通过后追加 1 条 status 事件：to=done
+- schema 固定：`echospec.index.v1`
+- at 使用 +08:00 当前时间（优先 python3）
 
-3) 读取 title：
-- 若有 jq：jq -r .title "$meta"
-- 否则：python3 -c 'import json;print(json.load(open("'"$meta"'")).get("title",""))'
-
-4) 生成 at（ISO +08:00），优先 python3：
-python3 - <<'PY'
-import datetime
-tz = datetime.timezone(datetime.timedelta(hours=8))
-print(datetime.datetime.now(tz).isoformat(timespec="seconds"))
-PY
-
-5) 追加 status 事件（to=in_progress）到 .echospec/index.jsonl：
-{
-  "schema":"echospec.index.v1",
-  "type":"status",
-  "at":"<at>",
-  "change_id":"<id>",
-  "title":"<title>",
-  "status":"in_progress",
-  "paths":{"change_dir":"<change_dir>","tasks":"<tasks>","spec":"<spec>","notes":"<notes>","meta":"<meta>"},
-  "refs":{"issue":null,"pr":null},
-  "tags":[],
-  "data":{"from":null,"to":"in_progress"}
-}
-
-6) 严格按 tasks.md 顺序执行。每完成一步：列出改动文件 + 如何验证（命令/测试/手动验证）。
-7) 若需求不清：写入 notes.md 的“待确认”，停止继续并向用户提问。
-8) 当 tasks 全部完成、测试/构建通过后：
-- 再生成新的 at（不要复用旧 at）
-- 追加 status 事件（to=done）：
-{
-  "schema":"echospec.index.v1",
-  "type":"status",
-  "at":"<at>",
-  "change_id":"<id>",
-  "title":"<title>",
-  "status":"done",
-  "paths":{"change_dir":"<change_dir>"},
-  "refs":{"issue":null,"pr":null},
-  "tags":[],
-  "data":{"from":"in_progress","to":"done"}
-}
+## 执行流程
+1) 确定 change_id；校验目录与 tasks/spec/meta 存在
+2) 追加 in_progress 事件到 `.echospec/index.jsonl`
+3) 严格按 tasks.md 顺序执行；每步完成都要给出：
+   - 改了哪些文件（列表）
+   - 如何验证（命令/测试/手动步骤）
+4) 全部完成后，确保构建/测试/验收通过
+5) 追加 done 事件到 `.echospec/index.jsonl`

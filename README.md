@@ -4,7 +4,7 @@ EchoSpec 是一套面向 Codex 的轻量变更工作流：用「用户自填的 
 
 > 设计原则：**只使用你本地 clone 的 EchoSpec 仓库作为来源**。  
 > EchoSpec 不会在安装/更新时额外从 GitHub clone/pull，也不会维护任何 “kit” 目录。  
-> 你想升级 EchoSpec：自己在这份仓库里 `git pull`，然后在项目里跑 `echospec update`。
+> 你想升级 EchoSpec：自己在这份仓库里 `git pull`，然后在项目里跑 `echospec update`。  
 
 ---
 
