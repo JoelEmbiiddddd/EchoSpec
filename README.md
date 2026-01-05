@@ -1,6 +1,6 @@
 # EchoSpec
 
-EchoSpec 是一套面向 Codex 的轻量变更工作流：用「用户自填的 tasks/spec/notes」+「事件账本 index.jsonl」实现可回放、可归档、可自动化。
+EchoSpec 是一套面向 Codex 的轻量变更工作流：用「用户自填的 tasks/spec/notes」+「事件账本 index.jsonl」实现可反思、可思考、可回放、可归档、可自动化。
 
 > 设计原则：**只使用你本地 clone 的 EchoSpec 仓库作为来源**。  
 > EchoSpec 不会在安装/更新时额外从 GitHub clone/pull，也不会维护任何 “kit” 目录。  
@@ -149,4 +149,5 @@ A: 这是刻意设计：**只认用户本地仓库**，版本更新由用户自�
 
 A: 因为 `echospec` stub 固定指向这份仓库路径，移动/删除后命令会失效。
 解决：到新的 EchoSpec 目录重新执行一次 `./scripts/cli.sh link` 生成新的 stub。
+
 
